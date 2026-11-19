@@ -1,0 +1,3 @@
+# Workstation packages. VS Code comes from snap (see bootstrap.sh).
+fontconfig
+tilix

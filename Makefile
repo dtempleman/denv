@@ -1,17 +1,30 @@
-VENV_DIR=.venv
+# Thin wrapper around bootstrap.sh. Pass options through, e.g.
+#   make server IDENTITY=kinsol
+#   make dotfiles ARGS=--dry-run
 
-PYTHON_PATH=$(PYTHONPATH)
+IDENTITY ?=
+ARGS ?=
+BOOT = ./bootstrap.sh $(if $(IDENTITY),--identity $(IDENTITY)) $(ARGS)
+STEPS = base shell dotfiles ssh gui vscode
 
-.PHONY: setup venv install clean
+.PHONY: help all server workstation dry-run $(STEPS)
 
-setup: venv install
+help:
+	@sed -n '2,17s/^# \{0,1\}//p' bootstrap.sh
+	@echo
+	@echo "make targets: all server workstation dry-run $(STEPS)"
 
-venv:
-	@test -d $(VENV_DIR) || $(PYTHON_PATH) -m venv $(VENV_DIR)
+all:
+	$(BOOT)
 
-install:
-	@$(VENV_DIR)/bin/pip install --upgrade pip
-	@$(VENV_DIR)/bin/pip install -r requirements.txt
+server:
+	$(BOOT) --profile server
 
-clean:
-	@rm -rf $(VENV_DIR)
+workstation:
+	$(BOOT) --profile workstation
+
+dry-run:
+	$(BOOT) --dry-run
+
+$(STEPS):
+	$(BOOT) --only $@
